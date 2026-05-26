@@ -34,3 +34,7 @@ This map connects backend questions to the signal type that can answer them. It 
 - `laravel_queue_jobs_total`
 - `laravel_queue_backlog`
 - `laravel_worker_memory_bytes`
+
+## Label policy
+
+The project label policy is stored in `docs/metrics-label-policy.md`. The most important rule is simple: labels may describe stable engineering groups, but they must not contain user ids, product ids, emails, request ids or raw URLs.
