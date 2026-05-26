@@ -1,4 +1,6 @@
-.PHONY: help install test check qa format lint-style analyse rector-dry rector test-coverage test-parallel test-architecture health migrate migrate-status build diff-check benchmark-baseline bootstrap-cost octane-up octane-down octane-logs octane-reload octane-watch front race-demo locking-demo memory-leak-demo octane-status benchmark-octane deploy-smoke
+.PHONY: help install test check qa format lint-style analyse rector-dry rector test-coverage test-parallel test-architecture health migrate migrate-status build diff-check benchmark-baseline bootstrap-cost octane-up octane-down octane-logs octane-reload octane-watch front race-demo locking-demo memory-leak-demo octane-status benchmark-octane deploy-smoke metrics-help metrics-up metrics-down metrics-logs metrics-check prometheus-targets grafana-open metrics-demo queue-demo
+
+OBSERVABILITY_COMPOSE=docker-compose.observability.yml
 
 help: ## Show available project commands
 	@grep -E '^[a-zA-Z0-9_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "%-22s %s\n", $$1, $$2}'
@@ -101,3 +103,40 @@ benchmark-octane: ## Measure the same routes under Octane runtime
 
 deploy-smoke: ## Run cheap smoke checks after reload or deploy
 	bash scripts/deploy-smoke.sh
+
+metrics-help: ## Show observability workflow notes
+	@echo "Observability workflow:"
+	@echo "  make metrics-up          start Prometheus/Grafana stack when compose config exists"
+	@echo "  make metrics-check       check the local metrics endpoint"
+	@echo "  make metrics-logs        follow observability stack logs"
+	@echo "  make prometheus-targets  show Prometheus targets endpoint"
+	@echo "  make grafana-open        print Grafana local URL"
+
+metrics-up: ## Start observability stack
+	@test -f $(OBSERVABILITY_COMPOSE) || (echo "$(OBSERVABILITY_COMPOSE) will be added in the Prometheus module."; exit 0)
+	docker compose -f docker-compose.octane.yml -f $(OBSERVABILITY_COMPOSE) up -d app prometheus grafana
+
+metrics-down: ## Stop observability stack
+	@test -f $(OBSERVABILITY_COMPOSE) || (echo "$(OBSERVABILITY_COMPOSE) is not present yet."; exit 0)
+	docker compose -f docker-compose.octane.yml -f $(OBSERVABILITY_COMPOSE) down
+
+metrics-logs: ## Follow observability stack logs
+	@test -f $(OBSERVABILITY_COMPOSE) || (echo "$(OBSERVABILITY_COMPOSE) is not present yet."; exit 0)
+	docker compose -f docker-compose.octane.yml -f $(OBSERVABILITY_COMPOSE) logs -f prometheus grafana
+
+metrics-check: ## Check the application metrics endpoint
+	curl -fsS http://127.0.0.1:$${OCTANE_PORT:-8000}/metrics | head -40
+
+prometheus-targets: ## Show Prometheus targets API response
+	curl -fsS http://127.0.0.1:9090/api/v1/targets | head -80
+
+grafana-open: ## Print Grafana local URL
+	@echo "Grafana: http://127.0.0.1:3000"
+
+metrics-demo: ## Call a few demo routes to generate HTTP metrics
+	curl -fsS http://127.0.0.1:$${OCTANE_PORT:-8000}/ >/dev/null
+	curl -fsS http://127.0.0.1:$${OCTANE_PORT:-8000}/health/ready >/dev/null
+	curl -fsS http://127.0.0.1:$${OCTANE_PORT:-8000}/dev/runtime/light >/dev/null
+
+queue-demo: ## Dispatch a demo queue workload for metrics practice
+	php artisan tinker --execute="App\\Jobs\\RecalculateProductSearchIndex::dispatch(App\\Models\\Product::query()->value('id') ?? 1);"
