@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProductApiController;
 use App\Http\Controllers\ProductAssetController;
 use App\Http\Controllers\ProductPublicationController;
+use App\Http\Controllers\MetricsController;
 use App\Models\Product;
 use App\Support\Runtime\IntentionalMemoryLeakProbe;
 use App\Support\Runtime\RequestContext;
@@ -21,6 +22,8 @@ Route::get('/', function () {
         'admin' => url('/admin'),
     ]);
 });
+
+Route::get('/metrics', MetricsController::class)->name('metrics');
 
 Route::get('/health/ready', function () {
     $checks = [
