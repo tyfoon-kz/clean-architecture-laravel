@@ -45,3 +45,15 @@ These checks are useful, but they answer "can we safely change the code". They d
 ## Current rule
 
 A green quality pipeline is necessary, but it is not the same as observable runtime behavior.
+
+## Questions before adding tools
+
+Before adding Prometheus, every runtime question should be phrased as a measurable signal.
+
+| Question | Useful signal | Why it matters |
+| --- | --- | --- |
+| Are users seeing slow product pages? | HTTP request duration by route | A slow catalog route hurts real work even when tests pass. |
+| Did the latest deploy increase failures? | HTTP responses by status code | Error rate is often visible before a bug report arrives. |
+| Is background work falling behind? | Queue backlog and job duration | A healthy web request can still hide delayed processing. |
+| Is Octane keeping too much state? | Worker memory and restarts | Long-running workers need runtime discipline from the previous course. |
+| Did an optimization help? | Before/after latency and throughput | Architecture decisions need evidence, not confidence. |
