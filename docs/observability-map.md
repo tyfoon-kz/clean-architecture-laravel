@@ -52,3 +52,12 @@ Metric type notes are stored in `docs/metric-types.md`.
 | `laravel_worker_memory_bytes` | Gauge | Memory usage can grow and shrink. |
 
 Runtime notes are stored in `docs/runtime-metrics.md`.
+
+## Capacity and saturation signals
+
+| Area | Saturation signal | First action |
+| --- | --- | --- |
+| Queue | `laravel_queue_backlog` keeps growing | Check failed jobs, worker count and job duration. |
+| HTTP workers | p95/p99 latency grows while request rate is stable | Check DB latency, memory growth and recent deploys. |
+| Database | product routes slow down together | Check query count, indexes and connection behavior. |
+| Octane runtime | worker memory grows over time | Check static state, retained references and max requests. |
