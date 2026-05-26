@@ -23,6 +23,9 @@ class MetricsRenderer
         $this->appendGauge($lines, 'laravel_queue_backlog', 'Current queued jobs waiting in the database queue.', [
             'queue' => 'default',
         ], $this->queueBacklog('default'));
+        $this->appendGauge($lines, 'laravel_queue_failed_jobs', 'Current failed jobs stored by Laravel.', [
+            'queue' => 'all',
+        ], $this->failedJobs());
 
         $data = $this->store->read();
 
@@ -47,6 +50,15 @@ class MetricsRenderer
     {
         try {
             return DB::table('jobs')->where('queue', $queue)->count();
+        } catch (Throwable) {
+            return 0;
+        }
+    }
+
+    private function failedJobs(): int
+    {
+        try {
+            return DB::table('failed_jobs')->count();
         } catch (Throwable) {
             return 0;
         }
