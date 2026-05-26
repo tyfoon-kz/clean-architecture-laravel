@@ -13,7 +13,7 @@ expected_branches=()
 while IFS= read -r branch; do
   expected_branches+=("$branch")
 done < <(
-  grep -Eo '`homework-[^`]+`' "$branch_map" \
+  grep -Eo '`lesson-v1-[^`]+`' "$branch_map" \
     | tr -d '`' \
     | grep -v '<' \
     | sort -u
@@ -27,8 +27,8 @@ for branch in "${expected_branches[@]}"; do
   fi
 done
 
-echo "Expected homework branches: ${#expected_branches[@]}"
-echo "Existing local homework branches: $(git branch --list 'homework-*' | wc -l | tr -d ' ')"
+echo "Expected lesson branches: ${#expected_branches[@]}"
+echo "Existing local lesson branches: $(git branch --list 'lesson-v1-*' | wc -l | tr -d ' ')"
 
 if (( ${#missing[@]} > 0 )); then
   echo "Missing homework branches:"
@@ -36,4 +36,4 @@ if (( ${#missing[@]} > 0 )); then
   exit 1
 fi
 
-echo "All homework branches from $branch_map exist locally."
+echo "All lesson branches from $branch_map exist locally."
