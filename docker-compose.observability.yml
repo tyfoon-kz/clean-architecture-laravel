@@ -1,4 +1,23 @@
 services:
+  app:
+    environment:
+      METRICS_STORE: redis
+      METRICS_REDIS_KEY: metrics:prometheus
+      REDIS_CLIENT: predis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  redis:
+    image: redis:7.4-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
   prometheus:
     image: prom/prometheus:v3.0.1
     command:
@@ -10,7 +29,8 @@ services:
     ports:
       - "${PROMETHEUS_PORT:-9090}:9090"
     depends_on:
-      - app
+      app:
+        condition: service_started
 
   grafana:
     image: grafana/grafana:11.4.0

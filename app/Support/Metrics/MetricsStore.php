@@ -2,6 +2,8 @@
 
 namespace App\Support\Metrics;
 
+use Illuminate\Support\Facades\Redis;
+
 class MetricsStore
 {
     private const HISTOGRAM_BUCKETS = [0.05, 0.1, 0.25, 0.5, 1, 2.5, 5];
@@ -50,6 +52,10 @@ class MetricsStore
 
     public function read(): array
     {
+        if ($this->usesRedis()) {
+            return $this->readFromRedis();
+        }
+
         $path = $this->path();
 
         if (! file_exists($path)) {
@@ -63,6 +69,12 @@ class MetricsStore
 
     private function mutate(callable $callback): void
     {
+        if ($this->usesRedis()) {
+            $this->writeToRedis($callback($this->readFromRedis()));
+
+            return;
+        }
+
         $path = $this->path();
         $directory = dirname($path);
 
@@ -90,6 +102,19 @@ class MetricsStore
         fclose($handle);
     }
 
+    private function readFromRedis(): array
+    {
+        $payload = Redis::get($this->redisKey());
+        $decoded = $payload ? json_decode((string) $payload, true) : null;
+
+        return is_array($decoded) ? array_replace_recursive($this->emptyData(), $decoded) : $this->emptyData();
+    }
+
+    private function writeToRedis(array $data): void
+    {
+        Redis::set($this->redisKey(), json_encode($data, JSON_PRETTY_PRINT));
+    }
+
     private function seriesKey(string $name, array $labels): string
     {
         ksort($labels);
@@ -100,6 +125,16 @@ class MetricsStore
     private function path(): string
     {
         return storage_path('app/metrics.json');
+    }
+
+    private function usesRedis(): bool
+    {
+        return config('metrics.store') === 'redis';
+    }
+
+    private function redisKey(): string
+    {
+        return (string) config('metrics.redis_key', 'metrics:prometheus');
     }
 
     private function emptyData(): array

@@ -1,4 +1,4 @@
-.PHONY: help install test check qa format lint-style analyse rector-dry rector test-coverage test-parallel test-architecture health migrate migrate-status build diff-check benchmark-baseline bootstrap-cost octane-up octane-down octane-logs octane-reload octane-watch front race-demo locking-demo memory-leak-demo octane-status benchmark-octane deploy-smoke metrics-help metrics-up metrics-down metrics-logs metrics-check prometheus-targets grafana-open metrics-demo queue-demo
+.PHONY: help install test check qa format lint-style analyse rector-dry rector test-coverage test-parallel test-architecture health migrate migrate-status build diff-check benchmark-baseline bootstrap-cost octane-up octane-down octane-logs octane-reload octane-watch front race-demo locking-demo memory-leak-demo octane-status benchmark-octane deploy-smoke metrics-help metrics-up metrics-down metrics-logs metrics-check metrics-redis-cli prometheus-targets grafana-open metrics-demo queue-demo
 
 OBSERVABILITY_COMPOSE=docker-compose.observability.yml
 
@@ -109,6 +109,7 @@ metrics-help: ## Show observability workflow notes
 	@echo "  make metrics-up          start Prometheus/Grafana stack when compose config exists"
 	@echo "  make metrics-check       check the local metrics endpoint"
 	@echo "  make metrics-logs        follow observability stack logs"
+	@echo "  make metrics-redis-cli   inspect Redis used by the metrics store"
 	@echo "  make prometheus-targets  show Prometheus targets endpoint"
 	@echo "  make grafana-open        print Grafana local URL"
 
@@ -122,10 +123,13 @@ metrics-down: ## Stop observability stack
 
 metrics-logs: ## Follow observability stack logs
 	@test -f $(OBSERVABILITY_COMPOSE) || (echo "$(OBSERVABILITY_COMPOSE) is not present yet."; exit 0)
-	docker compose -f docker-compose.octane.yml -f $(OBSERVABILITY_COMPOSE) logs -f prometheus grafana
+	docker compose -f docker-compose.octane.yml -f $(OBSERVABILITY_COMPOSE) logs -f redis prometheus grafana
 
 metrics-check: ## Check the application metrics endpoint
 	curl -fsS http://127.0.0.1:$${OCTANE_PORT:-8000}/metrics | head -40
+
+metrics-redis-cli: ## Open redis-cli inside the observability Redis service
+	docker compose -f docker-compose.octane.yml -f $(OBSERVABILITY_COMPOSE) exec redis redis-cli
 
 prometheus-targets: ## Show Prometheus targets API response
 	curl -fsS http://127.0.0.1:9090/api/v1/targets | head -80
