@@ -42,6 +42,24 @@ These checks are useful, but they answer "can we safely change the code". They d
 - Octane worker signals are only checked through scripts and logs, not metrics.
 - There is no Grafana dashboard tied to operational questions.
 
+## Prometheus stack
+
+Prometheus and Grafana are described through `docker-compose.observability.yml`.
+
+```bash
+make metrics-up
+make metrics-logs
+make prometheus-targets
+make grafana-open
+```
+
+Prometheus scrapes two jobs at the start:
+
+- `prometheus` for the monitoring server itself;
+- `laravel` for the application `/metrics` endpoint.
+
+The Laravel endpoint is added later in the course, so an early scrape failure is expected until the application exposes metrics.
+
 ## Current rule
 
 A green quality pipeline is necessary, but it is not the same as observable runtime behavior.
