@@ -60,6 +60,21 @@ Prometheus scrapes two jobs at the start:
 
 The Laravel endpoint is added later in the course, so an early scrape failure is expected until the application exposes metrics.
 
+## Reading graph changes
+
+When a graph changes, do not write the first explanation as fact. Start with a hypothesis.
+
+Useful questions:
+
+- Did traffic change at the same time?
+- Did deploy or reload happen near the spike?
+- Did scrape gaps appear?
+- Did error rate change together with latency?
+- Did queue backlog grow before HTTP latency changed?
+- Did worker memory grow before the problem?
+
+One graph is a signal. A decision needs a causal chain.
+
 ## Current rule
 
 A green quality pipeline is necessary, but it is not the same as observable runtime behavior.
