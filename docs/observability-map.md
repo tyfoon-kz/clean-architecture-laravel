@@ -50,3 +50,5 @@ Metric type notes are stored in `docs/metric-types.md`.
 | `laravel_queue_jobs_total` | Counter | Handled jobs only increase over time. |
 | `laravel_queue_backlog` | Gauge | Backlog can grow and shrink. |
 | `laravel_worker_memory_bytes` | Gauge | Memory usage can grow and shrink. |
+
+Runtime notes are stored in `docs/runtime-metrics.md`.

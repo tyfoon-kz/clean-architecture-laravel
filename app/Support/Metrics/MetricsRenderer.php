@@ -20,6 +20,8 @@ class MetricsRenderer
 
         $this->appendGauge($lines, 'laravel_worker_memory_bytes', 'Current PHP memory usage in bytes.', [], memory_get_usage(true));
         $this->appendGauge($lines, 'laravel_worker_memory_peak_bytes', 'Peak PHP memory usage in bytes.', [], memory_get_peak_usage(true));
+        $this->appendGauge($lines, 'laravel_worker_uptime_seconds', 'Current PHP worker uptime in seconds for this process.', [], MetricsRuntime::uptimeSeconds());
+        $this->appendGauge($lines, 'laravel_worker_process_id', 'Current PHP process id exposed as a gauge for local diagnostics.', [], getmypid() ?: 0);
         $this->appendGauge($lines, 'laravel_queue_backlog', 'Current queued jobs waiting in the database queue.', [
             'queue' => 'default',
         ], $this->queueBacklog('default'));
