@@ -1,0 +1,50 @@
+<?php
+
+namespace App\Notifications;
+
+use App\Models\Product;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Notification;
+
+class ProductChangedNotification extends Notification implements ShouldQueue
+{
+    use Queueable;
+
+    public function __construct(public Product $product, public string $event) {}
+
+    /**
+     * Get the notification's delivery channels.
+     *
+     * @return array<int, string>
+     */
+    public function via(object $notifiable): array
+    {
+        return ['mail'];
+    }
+
+    /**
+     * Get the mail representation of the notification.
+     */
+    public function toMail(object $notifiable): MailMessage
+    {
+        return (new MailMessage)
+            ->subject("Product {$this->event}: {$this->product->sku}")
+            ->line("Product {$this->product->name} was {$this->event}.")
+            ->action('Open admin', url('/admin/products/'.$this->product->id.'/edit'));
+    }
+
+    /**
+     * Get the array representation of the notification.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(object $notifiable): array
+    {
+        return [
+            'product_id' => $this->product->id,
+            'event' => $this->event,
+        ];
+    }
+}
