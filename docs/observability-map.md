@@ -38,3 +38,15 @@ This map connects backend questions to the signal type that can answer them. It 
 ## Label policy
 
 The project label policy is stored in `docs/metrics-label-policy.md`. The most important rule is simple: labels may describe stable engineering groups, but they must not contain user ids, product ids, emails, request ids or raw URLs.
+
+## Metric type decisions
+
+Metric type notes are stored in `docs/metric-types.md`.
+
+| Metric | Type | Reason |
+| --- | --- | --- |
+| `laravel_http_requests_total` | Counter | Requests only increase over time. |
+| `laravel_http_request_duration_seconds` | Histogram | Latency needs buckets and percentiles. |
+| `laravel_queue_jobs_total` | Counter | Handled jobs only increase over time. |
+| `laravel_queue_backlog` | Gauge | Backlog can grow and shrink. |
+| `laravel_worker_memory_bytes` | Gauge | Memory usage can grow and shrink. |
