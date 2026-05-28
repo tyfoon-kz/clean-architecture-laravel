@@ -1,4 +1,4 @@
-.PHONY: help install test check qa format lint-style analyse rector-dry rector test-coverage test-parallel test-architecture health migrate migrate-status build diff-check benchmark-baseline bootstrap-cost octane-up octane-down octane-logs octane-reload octane-watch front race-demo locking-demo memory-leak-demo octane-status benchmark-octane deploy-smoke metrics-help metrics-up metrics-down metrics-logs metrics-check metrics-redis-cli prometheus-targets grafana-open metrics-demo queue-demo
+.PHONY: deptrac architecture-check help install test check qa format lint-style analyse rector-dry rector test-coverage test-parallel test-architecture health migrate migrate-status build diff-check benchmark-baseline bootstrap-cost octane-up octane-down octane-logs octane-reload octane-watch front race-demo locking-demo memory-leak-demo octane-status benchmark-octane deploy-smoke metrics-help metrics-up metrics-down metrics-logs metrics-check metrics-redis-cli prometheus-targets grafana-open metrics-demo queue-demo
 
 OBSERVABILITY_COMPOSE=docker-compose.observability.yml
 
@@ -144,3 +144,9 @@ metrics-demo: ## Call a few demo routes to generate HTTP metrics
 
 queue-demo: ## Dispatch a demo queue workload for metrics practice
 	php artisan tinker --execute="App\\Jobs\\RecalculateProductSearchIndex::dispatch(App\\Models\\Product::query()->value('id') ?? 1);"
+
+
+deptrac: ## Run Deptrac dependency rules
+	./vendor/bin/deptrac analyse --config-file=deptrac.yaml
+
+architecture-check: deptrac test-architecture ## Run architecture checks
