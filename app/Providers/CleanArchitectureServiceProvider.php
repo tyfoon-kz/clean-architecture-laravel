@@ -10,6 +10,9 @@ final class CleanArchitectureServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        // Bindings are added when infrastructure adapters appear.
+        $this->app->bind(
+            \App\Application\Catalog\Nomenclature\Contracts\NomenclatureRepository::class,
+            \App\Infrastructure\Persistence\Eloquent\Repositories\EloquentNomenclatureRepository::class,
+        );
     }
 }
