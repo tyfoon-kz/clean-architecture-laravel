@@ -6,4 +6,9 @@ namespace App\Domain\Catalog\Nomenclature;
 
 final class Nomenclature
 {
+    public function __construct(
+        public readonly NomenclatureId $id,
+        public readonly NomenclatureName $name,
+    ) {
+    }
 }
